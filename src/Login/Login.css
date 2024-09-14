@@ -1,0 +1,21 @@
+.transition-all {
+  transition: all 1s ease-in-out;
+}
+
+button {
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-white {
+  color: #ffffff;
+}

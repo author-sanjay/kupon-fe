@@ -1,98 +1,107 @@
-import { ConnectButton } from "thirdweb/react";
-import thirdwebIcon from "./thirdweb.svg";
-import { client } from "./client";
+import React, { useState, useEffect } from "react";
+import { useContract, useMetamask } from "@thirdweb-dev/react";
+import { Button, Input, Text } from "@mantine/core";
 
-export function App() {
-	return (
-		<main className="p-4 pb-10 min-h-[100vh] flex items-center justify-center container max-w-screen-lg mx-auto">
-			<div className="py-20">
-				<Header />
+// Your contract address
+const contractAddress = "0x1ACCF3b22742343Ff38d5ccc2ac70718FBAcBC8d";
 
-				<div className="flex justify-center mb-20">
-					<ConnectButton
-						client={client}
-						appMetadata={{
-							name: "Example app",
-							url: "https://example.com",
-						}}
-					/>
-				</div>
+const App = () => {
+  const { connect, isConnected } = useMetamask();
+  const { contract } = useContract(contractAddress, "erc721");
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [storeName, setStoreName] = useState("");
+  const [discountPercentage, setDiscountPercentage] = useState<number>(0);
+  const [expiration, setExpiration] = useState<number>(0);
 
-				<ThirdwebResources />
-			</div>
-		</main>
-	);
-}
+  const fetchCoupons = async () => {
+    if (contract) {
+      try {
+        const allCoupons = await contract.call("getAllActiveCoupons");
+        setCoupons(allCoupons);
+      } catch (error) {
+        console.error("Error fetching coupons:", error);
+      }
+    }
+  };
+  useEffect(() => {
+    fetchCoupons();
+  }, [contract]);
 
-function Header() {
-	return (
-		<header className="flex flex-col items-center mb-20 md:mb-20">
-			<img
-				src={thirdwebIcon}
-				alt=""
-				className="size-[150px] md:size-[150px]"
-				style={{
-					filter: "drop-shadow(0px 0px 24px #a726a9a8)",
-				}}
-			/>
+  const mintCoupon = async () => {
+    if (!contract) return;
 
-			<h1 className="text-2xl md:text-6xl font-bold tracking-tighter mb-6 text-zinc-100">
-				thirdweb SDK
-				<span className="text-zinc-300 inline-block mx-1"> + </span>
-				<span className="inline-block -skew-x-6 text-violet-500"> vite </span>
-			</h1>
+    try {
+      const tx = await contract.call("mintCoupon", [
+        storeName,
+        discountPercentage,
+        expiration,
+      ]);
+      await tx.wait();
+      alert("Coupon minted!");
+      await fetchCoupons();
+    } catch (error) {
+      console.error("Error minting coupon:", error);
+    }
+  };
 
-			<p className="text-zinc-300 text-base">
-				Read the{" "}
-				<code className="bg-zinc-800 text-zinc-300 px-2 rounded py-1 text-sm mx-1">
-					README.md
-				</code>{" "}
-				file to get started.
-			</p>
-		</header>
-	);
-}
+  const useCoupon = async (tokenId: number) => {
+    if (!contract) return;
 
-function ThirdwebResources() {
-	return (
-		<div className="grid gap-4 lg:grid-cols-3 justify-center">
-			<ArticleCard
-				title="thirdweb SDK Docs"
-				href="https://portal.thirdweb.com/typescript/v5"
-				description="thirdweb TypeScript SDK documentation"
-			/>
+    try {
+      const tx = await contract.call("useCoupon", [tokenId]);
+      await tx.wait();
+      alert("Coupon used!");
+      await fetchCoupons();
+    } catch (error) {
+      console.error("Error using coupon:", error);
+    }
+  };
 
-			<ArticleCard
-				title="Components and Hooks"
-				href="https://portal.thirdweb.com/typescript/v5/react"
-				description="Learn about the thirdweb React components and hooks in thirdweb SDK"
-			/>
+  return (
+    <div>
+      {!isConnected ? (
+        <Button onClick={() => connect()}>Connect with MetaMask</Button>
+      ) : (
+        <>
+          <Text size="xl" weight={700}>
+            Coupon Management
+          </Text>
+          <Input
+            placeholder="Store Name"
+            value={storeName}
+            onChange={(e) => setStoreName(e.target.value)}
+          />
+          <Input
+            placeholder="Discount Percentage"
+            type="number"
+            value={discountPercentage}
+            onChange={(e) => setDiscountPercentage(Number(e.target.value))}
+          />
+          <Input
+            placeholder="Expiration (timestamp)"
+            type="number"
+            value={expiration}
+            onChange={(e) => setExpiration(Number(e.target.value))}
+          />
+          <Button onClick={mintCoupon}>Mint Coupon</Button>
 
-			<ArticleCard
-				title="thirdweb Dashboard"
-				href="https://thirdweb.com/dashboard"
-				description="Deploy, configure, and manage your smart contracts from the dashboard."
-			/>
-		</div>
-	);
-}
+          <Text size="lg" weight={500} mt="md">
+            Active Coupons:
+          </Text>
+          <ul>
+            {coupons.map((coupon: any) => (
+              <li key={coupon.tokenId.toString()}>
+                <Text>{`Store: ${coupon.storeName}, Discount: ${coupon.discountPercentage}%`}</Text>
+                <Button onClick={() => useCoupon(coupon.tokenId.toNumber())}>
+                  Use Coupon
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+};
 
-function ArticleCard(props: {
-	title: string;
-	href: string;
-	description: string;
-}) {
-	return (
-		<a
-			href={`${props.href}?utm_source=vite-template`}
-			target="_blank"
-			className="flex flex-col border border-zinc-800 p-4 rounded-lg hover:bg-zinc-900 transition-colors hover:border-zinc-700"
-			rel="noreferrer"
-		>
-			<article>
-				<h2 className="text-lg font-semibold mb-2">{props.title}</h2>
-				<p className="text-sm text-zinc-400">{props.description}</p>
-			</article>
-		</a>
-	);
-}
+export default App;
