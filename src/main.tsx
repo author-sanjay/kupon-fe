@@ -5,6 +5,10 @@ import { NFTContextProvider } from "./Context/Web3Context";
 
 import "./index.css";
 import Login from "./Login/Login2";
+import { SnackbarProvider } from "notistack";
+import { AuthContextProvider } from "./Context/AuthContext";
+import App from "./App";
+import { MantineProvider } from "@mantine/core";
 
 // Define the chain for the test network (e.g., Sepolia)
 const activeChain = {
@@ -23,9 +27,13 @@ const activeChain = {
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThirdwebProvider activeChain={11155111}>
-      <NFTContextProvider>
-        <Login />
-      </NFTContextProvider>
+      <AuthContextProvider>
+        <NFTContextProvider>
+          <SnackbarProvider>
+            <App />
+          </SnackbarProvider>
+        </NFTContextProvider>
+      </AuthContextProvider>
     </ThirdwebProvider>
   </React.StrictMode>
 );

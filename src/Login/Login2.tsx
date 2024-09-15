@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./Login.css"; // Import the CSS file for transitions
 import { motion } from "framer-motion";
+import axios from "axios";
 import {
   CircleCheckBig,
   IdCard,
@@ -9,7 +10,10 @@ import {
   User,
   UsersRound,
 } from "lucide-react";
+import { enqueueSnackbar } from "notistack";
+import { useAuth } from "../Context/AuthContext";
 const Login = () => {
+  const { setUserAuth } = useAuth();
   const [login, setLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,8 +39,58 @@ const Login = () => {
     setEmail(e.target.value);
   };
 
-  const onSubmit = (data: any) => {
-    console.log("Form Data: ", data);
+  const handleLogin = () => {
+    const data = { email: email, password: password };
+    axios
+      .post("http://localhost:3333/auth/login", data)
+      .then((response) => {
+        setUserAuth(response.data.access_token);
+        enqueueSnackbar("Login Success", {
+          variant: "success",
+          autoHideDuration: 3000,
+          preventDuplicate: true,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const handleSignup = () => {
+    const data = {
+      email: email,
+      password: password,
+      firstName: firstName,
+      lastName: lastName,
+      middleName: middleName.length > 0 ? middleName : null,
+      isCompany: false,
+    };
+    axios
+      .post("http://localhost:3333/user/register", data)
+      .then((response) => {
+        setEmail("");
+        setPassword("");
+        setLogin(true);
+        setEmailValid(false);
+        enqueueSnackbar(
+          "Success: Your Account has been registered. Please Login to your account",
+          { variant: "success", autoHideDuration: 3000, preventDuplicate: true }
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+        enqueueSnackbar(err.response.data.message, {
+          variant: "error",
+          autoHideDuration: 3000,
+          preventDuplicate: true,
+        });
+        setLogin(true);
+        setEmail("");
+        setEmailValid(false);
+        setPassword("");
+        setFirstName("");
+        setLastName("");
+        setMiddleName("");
+      });
   };
   return (
     <div className="w-screen h-screen flex flex-row bg-white text-black">
@@ -49,9 +103,9 @@ const Login = () => {
           <>
             <motion.div
               className="w-1/3 h-full flex flex-col justify-center items-center"
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 1 }}
             >
               <span className="text-black text-[6vh] font-bold font-serif">
                 Sign In
@@ -65,7 +119,7 @@ const Login = () => {
                 <input
                   type="email"
                   onChange={handleEmailChange}
-                  className={`border border-gray-300 rounded-lg p-2 pl-10 w-full transition-all duration-300 ${
+                  className={`border border-gray-300 text-black rounded-lg p-2 pl-10 w-full transition-all duration-300 ${
                     emailValid ? "border-green-500" : ""
                   }`}
                   placeholder="Email"
@@ -76,9 +130,10 @@ const Login = () => {
               </div>
 
               <div className="relative flex items-center w-full mt-5">
+                <KeyRound className="absolute left-3 text-gray-500" />
                 <input
                   type="password"
-                  className="border border-gray-300 rounded-lg p-2 w-full outline-none"
+                  className="border border-gray-300 text-black rounded-lg p-2 pl-10 w-full transition-all duration-300"
                   placeholder="Password"
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -92,7 +147,7 @@ const Login = () => {
                 disabled={!emailValid}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {}}
+                onClick={handleLogin}
               >
                 Login
               </motion.button>
@@ -106,10 +161,7 @@ const Login = () => {
             <p className="mb-8 text-white">
               We missed you! Explore new features and updates.
             </p>
-            <button
-              className="px-10 py-2 bg-black border-white border-2 rounded-lg text-white hover:bg-white hover:text-black transition"
-              onClick={() => setLogin(true)}
-            >
+            <button className="px-10 py-2 bg-black border-white border-2 rounded-lg text-white hover:bg-white hover:text-black transition">
               Log In
             </button>
           </div>
@@ -138,9 +190,9 @@ const Login = () => {
           <>
             <motion.div
               className="w-1/3 h-full flex flex-col justify-center items-center"
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 2 }}
             >
               <span className="text-black text-[6vh] font-bold font-serif">
                 Sign Up
@@ -157,7 +209,7 @@ const Login = () => {
                       value={email}
                       type="email"
                       onChange={handleEmailChange}
-                      className={`border border-gray-300 rounded-lg p-2 pl-10 w-full transition-all duration-300 ${
+                      className={`border border-gray-300 text-black rounded-lg p-2 pl-10 w-full transition-all duration-300 ${
                         emailValid ? "border-green-500" : ""
                       }`}
                       placeholder="Email"
@@ -172,7 +224,7 @@ const Login = () => {
                       value={password}
                       type="password"
                       onChange={(e) => setPassword(e.target.value)}
-                      className={`border border-gray-300 rounded-lg p-2 pl-10 w-full transition-all duration-300`}
+                      className={`border border-gray-300 text-black rounded-lg p-2 pl-10 w-full transition-all duration-300`}
                       placeholder="Password"
                     />
                   </div>
@@ -181,7 +233,7 @@ const Login = () => {
                     <input
                       type="password"
                       onChange={(e) => handleSignUpPassword(e.target.value)}
-                      className={`border border-gray-300 rounded-lg p-2 pl-10 w-full transition-all duration-300 ${
+                      className={`border border-gray-300 text-black rounded-lg p-2 pl-10 w-full transition-all duration-300 ${
                         passwordMatch ? "border-green-500" : ""
                       }`}
                       placeholder="Confirm Password"
@@ -213,7 +265,7 @@ const Login = () => {
                       value={firstName}
                       type="text"
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="border border-gray-300 rounded-lg p-2 pl-10 w-full"
+                      className="border border-gray-300 text-black rounded-lg p-2 pl-10 w-full"
                       placeholder="First Name"
                     />
                   </div>
@@ -223,7 +275,7 @@ const Login = () => {
                       value={middleName}
                       type="text"
                       onChange={(e) => setMiddleName(e.target.value)}
-                      className="border border-gray-300 rounded-lg p-2 pl-10 w-full"
+                      className="border border-gray-300 text-black rounded-lg p-2 pl-10 w-full"
                       placeholder="Middle Name"
                     />
                   </div>
@@ -233,7 +285,7 @@ const Login = () => {
                       value={lastName}
                       type="text"
                       onChange={(e) => setLastName(e.target.value)}
-                      className="border border-gray-300 rounded-lg p-2 pl-10 w-full"
+                      className="border border-gray-300 rounded-lg  text-black p-2 pl-10 w-full"
                       placeholder="Last Name"
                     />
                   </div>
@@ -242,7 +294,7 @@ const Login = () => {
                     className="bg-blue-500 text-white p-2 rounded-lg mt-5 w-full hover:bg-blue-600 transition-colors duration-300"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={onSubmit}
+                    onClick={handleSignup}
                   >
                     Sign Up
                   </motion.button>

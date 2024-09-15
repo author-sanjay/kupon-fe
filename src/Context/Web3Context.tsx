@@ -5,26 +5,23 @@ import {
   useContractWrite,
   useWallet,
 } from "@thirdweb-dev/react";
-import { ThirdwebSDK } from "@thirdweb-dev/sdk";
-import { Contract } from "ethers";
 
-interface CouponData {
-  storeName: string;
-  discount: number;
-  expiration: string | number | Date;
-}
+import { ethers } from "ethers";
+import { useAuth } from "./AuthContext";
 
 const NFTContext = createContext<
   | {
       address: string | undefined;
-      publishCoupon: (data: CouponData) => Promise<void>;
+      publishCoupon: any;
+      getAllCouponsForOwner: any;
     }
   | undefined
 >(undefined);
 
 export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
+  const { user, handleUserContracts } = useAuth();
   const { contract } = useContract(
-    "0xf3B5ceF2A8D8B03027D58bc6bd0362388c8310C9"
+    "0xbf739544918f6fD61e860541043e9e5979B83d53"
   );
 
   const { mutateAsync: mintCoupon } = useContractWrite(contract, "mintCoupon");
@@ -35,29 +32,29 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
     if (!address) {
       wallet?.connect();
     }
-  }, [address, wallet]);
+  }, [address, wallet, user]);
 
-  const publishCoupon = async (data: CouponData) => {
+  const publishCoupon = async (data: any) => {
     console.log("Contract:", contract); // Ensure contract is not undefined
-
-    if (!address) {
-      throw new Error("No address found. Please connect your wallet.");
-    }
+    let availableAddres = address || user.walletAddress;
 
     const expiry = new Date(data.expiration).getTime();
+    const priceInWei = ethers.utils.parseEther(data.price); // Convert price from ETH to wei
 
     try {
-      // Ensure mintCoupon is defined
-      if (!mintCoupon) {
-        throw new Error("mintCoupon function is not defined.");
-      }
-
-      // Call mintCoupon method
+      // Use the mutateAsync function for minting
       const nftData = await mintCoupon({
-        args: [address, data.storeName, data.discount, expiry],
+        args: [
+          availableAddres,
+          data.storeName,
+          data.couponCode,
+          data.discount,
+          expiry,
+          priceInWei,
+        ],
       });
 
-      console.log("NFT Data:", nftData);
+      return nftData;
     } catch (err) {
       console.error("Error:", err);
     }
@@ -68,12 +65,29 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
     console.log(coupons, "coupons");
   };
 
+  const getAllCouponsForOwner = async (owner: string) => {
+    try {
+      if (!contract) {
+        throw new Error("Contract is not defined.");
+      }
+      return await contract.call("getAllCouponsForOwner", [owner]);
+    } catch (err) {
+      console.error("Error:", err);
+    }
+  };
+
   useEffect(() => {
+    console.log(contract);
     getAllCoupons();
+    getAllCouponsForOwner(address).then((coupon) => {
+      handleUserContracts(coupon);
+    });
   }, [contract]);
 
   return (
-    <NFTContext.Provider value={{ address, publishCoupon }}>
+    <NFTContext.Provider
+      value={{ address, publishCoupon, getAllCouponsForOwner }}
+    >
       {children}
     </NFTContext.Provider>
   );

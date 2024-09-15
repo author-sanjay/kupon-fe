@@ -1,3 +1,160 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+/* Hero.css */
+
+@keyframes moveTopLeftToBottomRight {
+  0% {
+    transform: translate(50%, -100%);
+  }
+  100% {
+    transform: translate(50%, 100%);
+  }
+}
+
+@keyframes moveBottomLeftToTopRight {
+  0% {
+    transform: translate(30%, 100%);
+  }
+  100% {
+    transform: translate(30%, -100%);
+  }
+}
+
+.nft-cards {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 50vh;
+}
+
+.nft-card {
+  width: 20vw;
+  height: 40vh;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  /* background: transparent;    */
+}
+
+.top-left-to-bottom-right {
+  display: flex;
+  flex-wrap: wrap;
+  width: 20vw;
+  justify-content: flex-start;
+  align-items: flex-start;
+  animation: moveTopLeftToBottomRight 20s linear infinite;
+}
+
+.bottom-left-to-top-right {
+  right: 15%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  width: 20vw;
+  animation: moveBottomLeftToTopRight 20s linear infinite;
+  transform: rotate(180deg); /* Adjust the starting point */
+}
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 3rem;
+}
+
+.sleeping-emoji {
+  font-size: 5rem;
+}
+
+.zzz-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.zzz {
+  font-size: 2rem;
+  animation: sleep 2s ease-in-out infinite;
+  opacity: 0;
+  position: absolute;
+}
+
+.zzz:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.zzz:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.zzz:nth-child(3) {
+  animation-delay: 0.8s;
+}
+
+@keyframes sleep {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+
+.developerQR {
+  position: relative;
+  width: 50%;
+  height: 100%;
+  display: flex;
+  align-items: baseline;
+}
+
+.developerContact {
+  width: 50%;
+  padding: 5%;
+  height: 90%;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  flex-direction: column;
+}
+.qrCode {
+  position: absolute;
+  bottom: -10%;
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+.developerContact {
+  flex: 1;
+  margin-right: 2rem;
+}
+
+.developerContact h2 {
+  font-size: 1.8rem;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.developerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
