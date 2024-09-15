@@ -232,12 +232,13 @@ const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
 
                 <SingleNft
                   nft={{
-                    image: nftUrl,
-                    discount: discount,
+                    logoUrl: nftUrl,
+                    discountPercentage: discount,
                     storeName: storeName,
                     price: price,
                     expiration: expiration,
                   }}
+                  owned={false}
                   preview={true}
                 />
               </div>

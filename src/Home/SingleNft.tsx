@@ -1,9 +1,11 @@
+import moment from "moment";
 import React from "react";
 interface SingleNftProps {
   nft: any;
   preview: boolean;
+  owned: boolean;
 }
-const SingleNft: React.FC<SingleNftProps> = ({ nft, preview }) => {
+const SingleNft: React.FC<SingleNftProps> = ({ nft, preview, owned }) => {
   return (
     <div className="flex h-fit justify-center items-center">
       <div className="relative group bg-gradient-to-br from-[#1F1C2C] to-[#453c6f] border-4 p-1 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-500">
@@ -13,7 +15,7 @@ const SingleNft: React.FC<SingleNftProps> = ({ nft, preview }) => {
               src={
                 preview && !nft.image
                   ? "https://images.pexels.com/photos/5011647/pexels-photo-5011647.jpeg"
-                  : nft.image
+                  : nft.logoUrl
               }
               alt={nft.name}
               className="object-cover w-full h-48 rounded-lg transition-transform duration-500 transform group-hover:scale-105"
@@ -27,13 +29,13 @@ const SingleNft: React.FC<SingleNftProps> = ({ nft, preview }) => {
             <p className="text-gray-400 text-sm">
               {preview && !nft.discount
                 ? "Coupon Discount"
-                : nft.discount + "% Off"}
+                : nft.discountPercentage + "% Off"}
             </p>
 
             <p className="text-gray-400 text-sm">
               {preview && !nft.expiration
                 ? "Expires on: YYYY-MM-DD"
-                : `Expires on: ${nft.expiration}`}
+                : `Expires on: ${moment(nft.expiration).format("MMM Do YYYY")}`}
             </p>
           </div>
 
@@ -42,9 +44,15 @@ const SingleNft: React.FC<SingleNftProps> = ({ nft, preview }) => {
             <span className="text-xl font-semibold text-[#FBCB0A]">
               {preview && !nft.price ? "Sell At" : nft.price} ETH
             </span>
-            <button className="px-4 py-2 bg-[#3A3043] text-white rounded-lg hover:bg-[#5C5470] transition-all duration-300">
-              Buy Now
-            </button>
+            {owned ? (
+              <button className="px-4 py-2 ml-3 bg-[#3A3043] text-white rounded-lg hover:bg-[#5C5470] transition-all duration-300">
+                Gift Coupon
+              </button>
+            ) : (
+              <button className="px-4 py-2 bg-[#3A3043] text-white rounded-lg hover:bg-[#5C5470] transition-all duration-300">
+                Buy Now
+              </button>
+            )}
           </div>
         </div>
       </div>
