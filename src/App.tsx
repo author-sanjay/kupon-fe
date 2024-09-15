@@ -7,7 +7,7 @@ const App = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    console.log(user);
+    console.log(user, "user");
   }, [user]);
   return !user ? <Login /> : <Home />;
 };

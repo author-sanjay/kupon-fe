@@ -21,7 +21,7 @@ const NFTContext = createContext<
 export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   const { user, handleUserContracts } = useAuth();
   const { contract } = useContract(
-    "0xbf739544918f6fD61e860541043e9e5979B83d53"
+    "0x820D099C0469f8aebA0c8CcF2D7a5EA00A11A303"
   );
 
   const { mutateAsync: mintCoupon } = useContractWrite(contract, "mintCoupon");
@@ -51,6 +51,7 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
           data.discount,
           expiry,
           priceInWei,
+          data.nftUrl,
         ],
       });
 

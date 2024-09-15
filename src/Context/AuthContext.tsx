@@ -16,7 +16,7 @@ interface AuthContextProps {
   setUserAuth: (token: string) => void;
   handleWalletUpdate: (walletAddress: string) => void;
   handleUserContracts: (contracts: []) => void;
-  handlePostNFT: (nftData: any) => void;
+  handlePostNFT: (nftData: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -42,16 +42,36 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleUserContracts = (contract: []) => {
-    setUser({ ...user, contracts: contract });
+    if (user != null) {
+      setUser({ ...user, contracts: contract });
+    }
   };
   const handleWalletUpdate = (walletAddress: string) => {
     setUser({ ...user, walletAddress: walletAddress });
   };
 
-  const handlePostNFT = (nftData: any) => {};
+  const handlePostNFT = async (nftData: any) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3333/coupons/addCoupon",
+        nftData,
+        {
+          headers: {
+            Authorization: `Bearer ${user.authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error posting NFT:", error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
+    console.log(storedUser);
     if (storedUser) {
       try {
         axios

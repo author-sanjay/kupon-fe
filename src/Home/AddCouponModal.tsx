@@ -44,16 +44,33 @@ const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
     setLoading(true);
     publishCoupon(couponData)
       .then((success: any) => {
-        const blockHash = success.blockHash;
+        const blockHash = `${success.blockHash}`;
         getAllCouponsForOwner(user.walletAddress).then((coupon) => {
           handleUserContracts(coupon);
-          enqueueSnackbar("Successfully Minted Coupon", {
-            preventDuplicate: true,
-            variant: "success",
-            autoHideDuration: 3000,
-          });
-          onClose();
         });
+        handlePostNFT({
+          title: storeName + " - " + user.id,
+          discount: discount,
+          platform: storeName,
+          description: couponCode,
+          photoUrl: nftUrl,
+          expiry: expiration,
+          isUsed: false,
+          createdBy: user.id,
+          nftAddress: blockHash,
+        })
+          .then(() => {
+            enqueueSnackbar("Successfully Minted Coupon", {
+              preventDuplicate: true,
+              variant: "success",
+              autoHideDuration: 3000,
+            });
+            setLoading(false);
+            onClose();
+          })
+          .catch((e) => {
+            onClose();
+          });
       })
       .catch((e: any) => {
         console.log(e);
