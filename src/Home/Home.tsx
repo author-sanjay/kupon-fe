@@ -13,7 +13,7 @@ function Home() {
   const { user } = useAuth();
   const [sell, setSell] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { getAllCouponsForOwner } = useNft();
+  const { getAllCouponsForOwner, lastAction } = useNft();
   const [marketPlaceClick, setMarketPlaceClick] = useState(false);
   const [isWalletConnected, setIsWalletConnected] = useState(
     user.walletAddress != null ? true : false
@@ -21,26 +21,6 @@ function Home() {
   const [addCoupon, setAddCoupon] = useState(false);
   const [userCoupons, setUserCoupons] = useState([]);
 
-  const hexToDecimal = (hex) => parseInt(hex, 16);
-
-  const unixToDateString = (timestamp) => new Date(timestamp).toISOString();
-
-  const weiToEth = (wei) => wei / 1e18;
-
-  function convertCouponDataArray(couponDataArray) {
-    const newData = couponDataArray.map((couponData) => ({
-      couponCode: couponData.couponCode,
-      discountPercentage: hexToDecimal(couponData.discountPercentage._hex),
-      expiration: unixToDateString(hexToDecimal(couponData.expiration._hex)),
-      isUsed: couponData.isUsed,
-      logoUrl: couponData.logoUrl,
-      marketable: couponData.marketable,
-      price: weiToEth(hexToDecimal(couponData.price._hex)),
-      storeName: couponData.storeName,
-    }));
-    console.log(newData);
-    return newData;
-  }
   useEffect(() => {
     if (user.walletAddress) {
       setIsWalletConnected(true);
@@ -48,21 +28,14 @@ function Home() {
       getAllCouponsForOwner(user.walletAddress)
         .then((coupons: any) => {
           setIsLoading(false);
-          const simpleCouponArray = convertCouponDataArray(coupons);
-          setUserCoupons(simpleCouponArray);
+          setUserCoupons(coupons);
           console.log(user);
         })
         .catch((error: any) => {
           console.error(error);
         });
     }
-  }, [user]);
-  const nft = {
-    name: "Galaxy Warrior",
-    description: "A warrior from the distant future...",
-    price: "3.5",
-    image: "https://your-nft-image-url.com",
-  };
+  }, [user, lastAction]);
 
   return (
     <>
@@ -153,7 +126,7 @@ function Home() {
                             )}
                           </div>
                         </>
-                      ) : (
+                      ) : userCoupons ? (
                         <>
                           <div className="grid grid-cols-5 gap-4 animate-fade-in">
                             {userCoupons?.map((coupon, index) => (
@@ -162,10 +135,13 @@ function Home() {
                                 nft={coupon}
                                 owned={true}
                                 preview={false}
+                                setLoading={setIsLoading}
                               />
                             ))}
                           </div>
                         </>
+                      ) : (
+                        <></>
                       )}
                     </div>
                   </div>

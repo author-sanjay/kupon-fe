@@ -6,9 +6,7 @@ import Home from "./Home/Home";
 const App = () => {
   const { user } = useAuth();
 
-  useEffect(() => {
-    console.log(user, "user");
-  }, [user]);
+ 
   return !user ? <Login /> : <Home />;
 };
 
