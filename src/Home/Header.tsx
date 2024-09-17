@@ -20,7 +20,6 @@ const Header: React.FC<HeaderProps> = ({
   const { user, handleWalletUpdate } = useAuth();
   const connectWallet = async () => {
     try {
-      console.log(user);
       if (window.ethereum) {
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
@@ -30,7 +29,6 @@ const Header: React.FC<HeaderProps> = ({
             userId: user.id,
             walletAddress: accounts[0],
           };
-          console.log(postWallet);
 
           axios
             .patch("http://localhost:3333/user/addWallet", postWallet, {
@@ -39,7 +37,6 @@ const Header: React.FC<HeaderProps> = ({
               },
             })
             .then((response) => {
-              console.log(response.data);
               handleWalletUpdate(response.data.walletAddress);
               setIsWalletConnected(true);
             })

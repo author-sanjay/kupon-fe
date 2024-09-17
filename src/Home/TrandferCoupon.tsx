@@ -30,7 +30,6 @@ const TransferCoupon: React.FC<TransferCouponProps> = ({
           onClose();
         })
         .catch((e) => {
-          console.log(e);
           enqueueSnackbar("Error Transfered Coupon", {
             preventDuplicate: true,
             variant: "success",

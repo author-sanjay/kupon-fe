@@ -22,7 +22,6 @@ const SingleNft: React.FC<SingleNftProps> = ({
 
   const handlePurchase = () => {
     setLoading(true);
-    console.log(nft);
     buyCoupon(nft.tokenId, nft.price)
       .then((data) => {
         setLoading(false);

@@ -73,7 +73,6 @@ const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
           });
       })
       .catch((e: any) => {
-        console.log(e);
         enqueueSnackbar("Error Minted Coupon", {
           preventDuplicate: true,
           variant: "error",

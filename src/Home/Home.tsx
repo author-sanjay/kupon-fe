@@ -29,7 +29,6 @@ function Home() {
         .then((coupons: any) => {
           setIsLoading(false);
           setUserCoupons(coupons);
-          console.log(user);
         })
         .catch((error: any) => {
           console.error(error);

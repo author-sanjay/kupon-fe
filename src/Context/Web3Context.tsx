@@ -52,7 +52,6 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (contract) {
-      console.log(signer, "signer");
       setethersContract(
         new ethers.Contract(
           "0x66133A51bb76dcFe36e1548315Ae352B393a1EaF",
@@ -63,7 +62,6 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [contract]);
   const publishCoupon = async (data: any) => {
-    console.log("Contract:", contract);
     let availableAddres = address || user.walletAddress;
 
     const expiry = new Date(data.expiration).getTime();
@@ -86,11 +84,6 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const { mutateAsync: transferCouponWrite } = useContractWrite(
-    contract,
-    "transferCoupon"
-  );
-
   const transferCoupon = async (
     myAddress: string,
     otherUserAddress: string,
@@ -98,7 +91,6 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     try {
       if (contract) {
-        console.log(contract.abi);
         const tokenIdBigInt = BigInt(tokenId);
         const transferResponse = await etherscontract.transferCouponWrite(
           myAddress,
@@ -106,9 +98,7 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
           tokenIdBigInt
         );
 
-        console.log(transferResponse);
         const receipt = transferResponse;
-        console.log("Transfer successful:", receipt);
         setLastAction(new Date());
         return receipt.wait();
       }
@@ -122,10 +112,8 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
       const tokenIdBigInt = BigInt(tokenId);
       const useCouponResponse = await etherscontract.useCoupon(tokenIdBigInt);
 
-      console.log(useCouponResponse);
       const receipt = useCouponResponse;
       setLastAction(new Date());
-      console.log("Coupon used successfully:", receipt);
       return receipt.wait();
     } catch (err) {
       console.error("Error using coupon:", err);
@@ -144,9 +132,7 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
       const tx = await etherscontract.buyCoupon(tokenIdBigInt, {
         value: priceInWei,
       });
-      console.log("Transaction sent:", tx);
       const receipt = await tx.wait();
-      console.log("Transaction successful:", receipt);
       setLastAction(new Date());
       return receipt;
     } catch (err) {
@@ -157,7 +143,6 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
 
   const getAllCoupons = async () => {
     const coupons = await contract?.call("getAllCoupons");
-    console.log(coupons, "coupons");
   };
 
   function convertCouponDataArray(couponDataArray) {
@@ -176,7 +161,6 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
       price: weiToEth(hexToDecimal(couponData.coupon.price._hex)),
       storeName: couponData.coupon.storeName,
     }));
-    console.log(newData);
     return newData;
   }
   const getAllCouponsForOwner = async (owner: string) => {
@@ -185,7 +169,6 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Contract is not defined.");
       }
       const coupons = await contract.call("getAllCouponsForOwner", [owner]);
-      console.log(coupons);
       return convertCouponDataArray(coupons);
     } catch (err) {
       console.error("Error:", err);
@@ -215,7 +198,6 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    console.log(contract?.abi);
     getAllCoupons();
     getAllCouponsForOwner(address).then((coupon) => {
       handleUserContracts(coupon);
