@@ -45,32 +45,10 @@ const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
     publishCoupon(couponData)
       .then((success: any) => {
         const blockHash = `${success.blockHash}`;
-        getAllCouponsForOwner(user.walletAddress).then((coupon) => {
+        getAllCouponsForOwner(user?.walletAddress).then((coupon: any) => {
           handleUserContracts(coupon);
+          onClose();
         });
-        handlePostNFT({
-          title: storeName + " - " + user.id,
-          discount: discount,
-          platform: storeName,
-          description: couponCode,
-          photoUrl: nftUrl,
-          expiry: expiration,
-          isUsed: false,
-          createdBy: user.id,
-          nftAddress: blockHash,
-        })
-          .then(() => {
-            enqueueSnackbar("Successfully Minted Coupon", {
-              preventDuplicate: true,
-              variant: "success",
-              autoHideDuration: 3000,
-            });
-            setLoading(false);
-            onClose();
-          })
-          .catch((e) => {
-            onClose();
-          });
       })
       .catch((e: any) => {
         enqueueSnackbar("Error Minted Coupon", {
@@ -226,6 +204,7 @@ const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
                 <h3 className="text-lg font-semibold mb-2">Live NFT Preview</h3>
 
                 <SingleNft
+                  setLoading={() => {}}
                   nft={{
                     logoUrl: nftUrl,
                     discountPercentage: discount,

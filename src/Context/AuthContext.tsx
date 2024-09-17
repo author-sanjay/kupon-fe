@@ -9,6 +9,9 @@ import {
 
 interface User {
   authToken?: string;
+  walletAddress?: string;
+  id?: string;
+  coupons?: [];
 }
 
 interface AuthContextProps {
@@ -17,6 +20,11 @@ interface AuthContextProps {
   handleWalletUpdate: (walletAddress: string) => void;
   handleUserContracts: (contracts: []) => void;
   handlePostNFT: (nftData: any) => Promise<void>;
+  handleCouponTransfer: (
+    nftTokenAddress?: string,
+    newUserWalletAddress?: string
+  ) => Promise<void>;
+  handleCouponUse: (nftTokenAddress: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -38,23 +46,44 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("user");
   };
 
-  const handleUserContracts = (contract: []) => {
-    if (user != null) {
-      setUser({ ...user, contracts: contract });
-    }
+  const handleUserContracts = (coupons: []) => {
+    console.log(coupons, "user getting");
+    setUser({ ...user, coupons: coupons });
   };
   const handleWalletUpdate = (walletAddress: string) => {
     setUser({ ...user, walletAddress: walletAddress });
   };
 
-  const handlePostNFT = async (nftData: any) => {
+  function convertToCouponDto(couponDataArray: []) {
+    console.log(couponDataArray);
+    return couponDataArray.map((couponData: any) => {
+      const couponDto = {
+        title: `${couponData.storeName} ${user?.id}`,
+        discount: couponData.discountPercentage,
+        platform: couponData.storeName,
+        description: couponData.couponCode,
+        photoUrl: couponData.logoUrl,
+        expiry: new Date(couponData.expiration),
+        isUsed: couponData.isUsed,
+        createdBy: user?.id,
+        nftAddress: couponData.tokenId.toString(),
+      };
+
+      return couponDto;
+    });
+  }
+  const handlePostNFT = async (listofCoupons?: []) => {
     try {
+      const nftData = convertToCouponDto(
+        // @ts-ignore
+        listofCoupons ? listofCoupons : user.coupons
+      );
       const response = await axios.post(
-        "http://localhost:3333/coupons/addCoupon",
+        "https://kupon-f86c.onrender.com:3333/coupons/addCouponsBatch",
         nftData,
         {
           headers: {
-            Authorization: `Bearer ${user.authToken}`,
+            Authorization: `Bearer ${user?.authToken}`,
             "Content-Type": "application/json",
           },
         }
@@ -66,12 +95,58 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const handleCouponTransfer = async (
+    nftTokenAddress?: string,
+    newUserWalletAddress?: string
+  ) => {
+    const transferData = {
+      nftAddress: nftTokenAddress,
+      newUserWalletAddress: newUserWalletAddress,
+    };
+    const response = await axios.patch(
+      "https://kupon-f86c.onrender.com:3333/coupons/transferCoupon",
+      transferData,
+      {
+        headers: {
+          Authorization: `Bearer ${user?.authToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  };
+
+  const handleCouponUse = async (nftTokenAddress: string) => {
+    const transferData = {
+      tokenId: nftTokenAddress,
+    };
+    const response = await axios.patch(
+      "https://kupon-f86c.onrender.com:3333/coupons/useCoupon",
+      transferData,
+      {
+        headers: {
+          Authorization: `Bearer ${user?.authToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  };
+
   useEffect(() => {
+    console.log("Running Now");
+
+    if (user?.coupons && user.coupons.length > 0) {
+      handlePostNFT();
+    }
+  }, [user?.coupons]);
+  useEffect(() => {
+    // @ts-ignore
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
       try {
         axios
-          .get("http://localhost:3333/user/getUser", {
+          .get("https://kupon-f86c.onrender.com:3333/user/getUser", {
             headers: {
               Authorization: `Bearer ${storedUser.authToken}`,
             },
@@ -97,6 +172,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         handleWalletUpdate,
         handleUserContracts,
         handlePostNFT,
+        handleCouponTransfer,
+        handleCouponUse,
       }}
     >
       {children}

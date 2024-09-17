@@ -34,12 +34,11 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   const { contract } = useContract(
     "0x66133A51bb76dcFe36e1548315Ae352B393a1EaF"
   );
-
+  // @ts-ignore
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   const [etherscontract, setethersContract] = useState({});
 
-  const { mutateAsync: mintCoupon } = useContractWrite(contract, "mintCoupon");
   const wallet = useWallet();
   const address = useAddress();
   const [lastAction, setLastAction] = useState(new Date());
@@ -62,12 +61,15 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [contract]);
   const publishCoupon = async (data: any) => {
-    let availableAddres = address || user.walletAddress;
+    let availableAddres = address || user?.walletAddress;
 
     const expiry = new Date(data.expiration).getTime();
+
+    // @ts-ignore
     const priceInWei = ethers.utils.parseEther(data.price);
 
     try {
+      // @ts-ignore
       const nftData = await etherscontract.mintCoupon(
         availableAddres,
         data.storeName,
@@ -92,7 +94,9 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
     try {
       if (contract) {
         const tokenIdBigInt = BigInt(tokenId);
-        const transferResponse = await etherscontract.transferCouponWrite(
+
+        // @ts-ignore
+        const transferResponse = await etherscontract.transferCoupon(
           myAddress,
           otherUserAddress,
           tokenIdBigInt
@@ -110,6 +114,8 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   const useCoupon = async (tokenId: number) => {
     try {
       const tokenIdBigInt = BigInt(tokenId);
+
+      // @ts-ignore
       const useCouponResponse = await etherscontract.useCoupon(tokenIdBigInt);
 
       const receipt = useCouponResponse;
@@ -127,8 +133,12 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const priceInString = price.toString();
+
+      // @ts-ignore
       const priceInWei = ethers.utils.parseEther(priceInString);
       const tokenIdBigInt = BigInt(tokenId);
+
+      // @ts-ignore
       const tx = await etherscontract.buyCoupon(tokenIdBigInt, {
         value: priceInWei,
       });
@@ -142,32 +152,56 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getAllCoupons = async () => {
+    // @ts-ignore
     const coupons = await contract?.call("getAllCoupons");
   };
 
-  function convertCouponDataArray(couponDataArray) {
+  function convertCouponDataArray(couponDataArray?: []) {
+    // @ts-ignore
     const newData = couponDataArray.map((couponData) => ({
+      // @ts-ignore
       tokenId: hexToDecimal(couponData.tokenId._hex),
+
+      // @ts-ignore
       couponCode: couponData.coupon.couponCode,
       discountPercentage: hexToDecimal(
+        // @ts-ignore
         couponData.coupon.discountPercentage._hex
       ),
       expiration: unixToDateString(
+        // @ts-ignore
         hexToDecimal(couponData.coupon.expiration._hex)
       ),
+
+      // @ts-ignore
       isUsed: couponData.coupon.isUsed,
+
+      // @ts-ignore
       logoUrl: couponData.coupon.logoUrl,
+
+      // @ts-ignore
       marketable: couponData.coupon.marketable,
+
+      // @ts-ignore
       price: weiToEth(hexToDecimal(couponData.coupon.price._hex)),
+
+      // @ts-ignore
       storeName: couponData.coupon.storeName,
     }));
     return newData;
   }
-  const getAllCouponsForOwner = async (owner: string) => {
+  const getAllCouponsForOwner = async (owner?: string) => {
     try {
+      // @ts-ignore
+      if (!ethers.utils.isAddress(owner)) {
+        console.log(owner);
+        throw new Error("Invalid Ethereum address.");
+      }
+
       if (!contract) {
         throw new Error("Contract is not defined.");
       }
+      // @ts-ignore
       const coupons = await contract.call("getAllCouponsForOwner", [owner]);
       return convertCouponDataArray(coupons);
     } catch (err) {
@@ -175,20 +209,19 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const hexToDecimal = (hex) => parseInt(hex, 16);
+  const hexToDecimal = (hex: any) => parseInt(hex, 16);
 
-  const unixToDateString = (timestamp) => new Date(timestamp).toISOString();
+  const unixToDateString = (timestamp: any) =>
+    new Date(timestamp).toISOString();
 
-  const weiToEth = (wei) => wei / 1e18;
+  const weiToEth = (wei: any) => wei / 1e18;
 
   useEffect(() => {
     const initializeWeb3 = async () => {
       if (window.ethereum) {
+        // @ts-ignore
         const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
         const web3Signer = web3Provider.getSigner();
-
-        setProvider(web3Provider);
-        setSigner(web3Signer);
       } else {
         console.error("MetaMask is not installed");
       }
@@ -198,10 +231,16 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    getAllCoupons();
-    getAllCouponsForOwner(address).then((coupon) => {
-      handleUserContracts(coupon);
-    });
+    if (contract) {
+      getAllCoupons();
+      getAllCouponsForOwner(user?.walletAddress).then((coupon) => {
+        console.log(coupon);
+        if (coupon) {
+          // @ts-ignore
+          handleUserContracts(coupon);
+        }
+      });
+    }
   }, [contract]);
 
   const getAllActiveCoupons = async () => {
@@ -209,6 +248,7 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
       if (!contract) {
         throw new Error("Contract is not defined.");
       }
+      // @ts-ignore
       const coupons = await contract.call("getAllActiveCoupons");
       return convertCouponDataArray(coupons);
     } catch (err) {

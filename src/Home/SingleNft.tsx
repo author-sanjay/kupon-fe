@@ -4,6 +4,7 @@ import { useNft } from "../Context/Web3Context";
 
 import TransferCoupon from "./TrandferCoupon";
 import { enqueueSnackbar } from "notistack";
+import { useAuth } from "../Context/AuthContext";
 interface SingleNftProps {
   nft: any;
   preview: boolean;
@@ -19,20 +20,27 @@ const SingleNft: React.FC<SingleNftProps> = ({
   const [showModal, setShowModal] = useState(false);
   const { buyCoupon, useCoupon } = useNft();
   const [front, setFront] = useState(true);
+  const { user, handleCouponTransfer, handleCouponUse } = useAuth();
 
   const handlePurchase = () => {
     setLoading(true);
     buyCoupon(nft.tokenId, nft.price)
-      .then((data) => {
+      .then(() => {
+        handleCouponTransfer(nft.toString(), user?.walletAddress)
+          .then((success) => {
+            console.log(success);
+            enqueueSnackbar("Successfully Transfered Coupon", {
+              preventDuplicate: true,
+              variant: "success",
+              autoHideDuration: 3000,
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
         setLoading(false);
-        enqueueSnackbar("SuccessFully Bought NFT.", {
-          preventDuplicate: true,
-          variant: "success",
-          autoHideDuration: 3000,
-        });
       })
-      .catch((e) => {
-        console.error(e);
+      .catch(() => {
         setLoading(false);
         enqueueSnackbar(
           "Error Buying NFT. Please Check your wallet is connected to this site",
@@ -44,15 +52,22 @@ const SingleNft: React.FC<SingleNftProps> = ({
   const handleCardFlip = () => {
     setLoading(true);
     useCoupon(nft.tokenId)
-      .then((response) => {
-        setLoading(false);
-        enqueueSnackbar("SuccessFully Found Coupon Code.", {
-          preventDuplicate: true,
-          variant: "success",
-          autoHideDuration: 3000,
-        });
+      .then(() => {
+        handleCouponUse(nft.tokenId.toString())
+          .then((response) => {
+            console.log(response);
+            setLoading(false);
+            enqueueSnackbar("SuccessFully Found Coupon Code.", {
+              preventDuplicate: true,
+              variant: "success",
+              autoHideDuration: 3000,
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+          });
       })
-      .catch((e) => {
+      .catch(() => {
         setLoading(false);
         enqueueSnackbar(
           "Error Revealing Coupon. Please Check your wallet is connected to this site",
@@ -139,6 +154,8 @@ const SingleNft: React.FC<SingleNftProps> = ({
                   >
                     Gift Coupon
                   </button>
+                ) : owned && nft.isUsed ? (
+                  <></>
                 ) : preview ? (
                   <button className="px-4 py-2 bg-[#3A3043] text-white rounded-lg hover:bg-[#5C5470] transition-all duration-300">
                     Buy Now

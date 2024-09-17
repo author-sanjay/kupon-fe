@@ -10,8 +10,8 @@ const MarketPlace = () => {
   const [isloading, setIsLoading] = useState(true);
 
   const [listOfCouponsOnSale, setListofCouponsOnSale] = useState([]);
-  function extractMarketableCoupons(coupons) {
-    return coupons.filter((coupon) => coupon.marketable === true);
+  function extractMarketableCoupons(coupons: any) {
+    return coupons.filter((coupon: any) => coupon.marketable === true);
   }
   const nft = {
     name: "Galaxy Warrior",
@@ -26,7 +26,7 @@ const MarketPlace = () => {
         setListofCouponsOnSale(extractMarketableCoupons(success));
         setIsLoading(false);
       })
-      .catch((e) => {
+      .catch((e: any) => {
         enqueueSnackbar("Error Fetching Coupons, Please try again later", {
           preventDuplicate: true,
           variant: "error",

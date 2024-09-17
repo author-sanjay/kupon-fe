@@ -14,22 +14,29 @@ const TransferCoupon: React.FC<TransferCouponProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const { transferCoupon } = useNft();
-  const { user } = useAuth();
-  const [toAddress, setToAddress] = useState(null);
+  const { user, handleCouponTransfer } = useAuth();
+  const [toAddress, setToAddress] = useState("");
   const handleTransferCoupon = () => {
     setLoading(true);
     if (toAddress) {
-      transferCoupon(user.walletAddress, toAddress, tokenId)
-        .then((success) => {
-          //ToDo: Add in DB
-          enqueueSnackbar("Successfully Transfered Coupon", {
-            preventDuplicate: true,
-            variant: "success",
-            autoHideDuration: 3000,
-          });
-          onClose();
+      transferCoupon(user?.walletAddress, toAddress, tokenId)
+        .then(() => {
+          console.log("done");
+          handleCouponTransfer(tokenId.toString(), toAddress)
+            .then((suc) => {
+              console.log(suc);
+              onClose();
+              enqueueSnackbar("Successfully Transfered Coupon", {
+                preventDuplicate: true,
+                variant: "success",
+                autoHideDuration: 3000,
+              });
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         })
-        .catch((e) => {
+        .catch(() => {
           enqueueSnackbar("Error Transfered Coupon", {
             preventDuplicate: true,
             variant: "success",

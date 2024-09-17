@@ -26,16 +26,20 @@ const Header: React.FC<HeaderProps> = ({
         });
         if (accounts.length > 0) {
           const postWallet = {
-            userId: user.id,
+            userId: user?.id,
             walletAddress: accounts[0],
           };
 
           axios
-            .patch("http://localhost:3333/user/addWallet", postWallet, {
-              headers: {
-                Authorization: `Bearer ${user.authToken}`,
-              },
-            })
+            .patch(
+              "https://kupon-f86c.onrender.com:3333/user/addWallet",
+              postWallet,
+              {
+                headers: {
+                  Authorization: `Bearer ${user?.authToken}`,
+                },
+              }
+            )
             .then((response) => {
               handleWalletUpdate(response.data.walletAddress);
               setIsWalletConnected(true);
@@ -116,7 +120,7 @@ const Header: React.FC<HeaderProps> = ({
               onClick={connectWallet}
               className="bg-[#CCBED0] text-[#3A3043] hover:text-white px-10 py-3 rounded-lg hover:bg-[#3A3043] hover:border-2 hover:cursor-pointer "
             >
-              Connected Wallet : {user.walletAddress.substring(0, 10)}...
+              Connected Wallet : {user?.walletAddress?.substring(0, 10)}...
             </span>
           </>
         ) : (

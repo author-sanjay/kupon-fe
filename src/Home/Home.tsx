@@ -10,23 +10,35 @@ import { Mail, Phone } from "lucide-react";
 import QR from "../assets/DeveloperQR.png";
 import AddCouponModal from "./AddCouponModal";
 function Home() {
-  const { user } = useAuth();
+  const { user, handlePostNFT } = useAuth();
   const [sell, setSell] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { getAllCouponsForOwner, lastAction } = useNft();
   const [marketPlaceClick, setMarketPlaceClick] = useState(false);
   const [isWalletConnected, setIsWalletConnected] = useState(
-    user.walletAddress != null ? true : false
+    user?.walletAddress != null ? true : false
   );
   const [addCoupon, setAddCoupon] = useState(false);
   const [userCoupons, setUserCoupons] = useState([]);
 
   useEffect(() => {
-    if (user.walletAddress) {
+    if (user && userCoupons && userCoupons.length > 0) {
+      handlePostNFT(userCoupons)
+        .then((success) => {
+          console.log(success);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+  }, [userCoupons]);
+  useEffect(() => {
+    if (user?.walletAddress) {
       setIsWalletConnected(true);
       setIsLoading(true);
-      getAllCouponsForOwner(user.walletAddress)
+      getAllCouponsForOwner(user?.walletAddress)
         .then((coupons: any) => {
+          console.log(coupons);
           setIsLoading(false);
           setUserCoupons(coupons);
         })
