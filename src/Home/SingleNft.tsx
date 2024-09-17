@@ -22,6 +22,7 @@ const SingleNft: React.FC<SingleNftProps> = ({
 
   const handlePurchase = () => {
     setLoading(true);
+    console.log(nft);
     buyCoupon(nft.tokenId, nft.price)
       .then((data) => {
         setLoading(false);
@@ -32,6 +33,7 @@ const SingleNft: React.FC<SingleNftProps> = ({
         });
       })
       .catch((e) => {
+        console.error(e);
         setLoading(false);
         enqueueSnackbar(
           "Error Buying NFT. Please Check your wallet is connected to this site",
@@ -58,7 +60,6 @@ const SingleNft: React.FC<SingleNftProps> = ({
           { preventDuplicate: true, variant: "error", autoHideDuration: 3000 }
         );
       });
-    // setFront(false);
   };
   return (
     <>
@@ -76,7 +77,7 @@ const SingleNft: React.FC<SingleNftProps> = ({
                 </div>
               ) : owned ? (
                 <div className="absolute top-6 right-2 z-10 bg-orange-400 w-fit px-3 py-2 rounded-lg">
-                  Used
+                  Owned
                 </div>
               ) : (
                 <></>

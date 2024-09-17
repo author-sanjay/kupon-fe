@@ -31,12 +31,13 @@ const NFTContext = createContext<
 
 export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   const { user, handleUserContracts } = useAuth();
-  const [provider, setProvider] =
-    useState<ethers.providers.Web3Provider | null>(null);
-  const [signer, setSigner] = useState<ethers.Signer | null>(null);
   const { contract } = useContract(
     "0x66133A51bb76dcFe36e1548315Ae352B393a1EaF"
   );
+
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const [etherscontract, setethersContract] = useState({});
 
   const { mutateAsync: mintCoupon } = useContractWrite(contract, "mintCoupon");
   const wallet = useWallet();
@@ -49,28 +50,37 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [address, wallet, user]);
 
+  useEffect(() => {
+    if (contract) {
+      console.log(signer, "signer");
+      setethersContract(
+        new ethers.Contract(
+          "0x66133A51bb76dcFe36e1548315Ae352B393a1EaF",
+          contract.abi,
+          signer
+        )
+      );
+    }
+  }, [contract]);
   const publishCoupon = async (data: any) => {
-    console.log("Contract:", contract); // Ensure contract is not undefined
+    console.log("Contract:", contract);
     let availableAddres = address || user.walletAddress;
 
     const expiry = new Date(data.expiration).getTime();
-    const priceInWei = ethers.utils.parseEther(data.price); // Convert price from ETH to wei
+    const priceInWei = ethers.utils.parseEther(data.price);
 
     try {
-      // Use the mutateAsync function for minting
-      const nftData = await mintCoupon({
-        args: [
-          availableAddres,
-          data.storeName,
-          data.couponCode,
-          data.discount,
-          expiry,
-          priceInWei,
-          data.nftUrl,
-        ],
-      });
+      const nftData = await etherscontract.mintCoupon(
+        availableAddres,
+        data.storeName,
+        data.couponCode,
+        data.discount,
+        expiry,
+        priceInWei,
+        data.nftUrl
+      );
       setLastAction(new Date());
-      return nftData;
+      return nftData.wait();
     } catch (err) {
       console.error("Error:", err);
     }
@@ -88,78 +98,59 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     try {
       if (contract) {
+        console.log(contract.abi);
         const tokenIdBigInt = BigInt(tokenId);
-        const transferResponse = await transferCouponWrite({
-          args: [myAddress, otherUserAddress, tokenIdBigInt],
-        });
+        const transferResponse = await etherscontract.transferCouponWrite(
+          myAddress,
+          otherUserAddress,
+          tokenIdBigInt
+        );
 
         console.log(transferResponse);
         const receipt = transferResponse;
         console.log("Transfer successful:", receipt);
         setLastAction(new Date());
-        return receipt;
+        return receipt.wait();
       }
     } catch (err) {
       console.error("Error transferring coupon:", err);
     }
   };
-  const { mutateAsync: useCouponWrite } = useContractWrite(
-    contract,
-    "useCoupon"
-  );
 
   const useCoupon = async (tokenId: number) => {
-    // Assume `contract` is your smart contract instance
-
     try {
-      if (contract) {
-        const tokenIdBigInt = BigInt(tokenId);
-        const useCouponResponse = await useCouponWrite({
-          args: [tokenIdBigInt],
-        });
+      const tokenIdBigInt = BigInt(tokenId);
+      const useCouponResponse = await etherscontract.useCoupon(tokenIdBigInt);
 
-        console.log(useCouponResponse);
-        const receipt = useCouponResponse;
-        setLastAction(new Date());
-        console.log("Coupon used successfully:", receipt);
-        return receipt;
-      }
+      console.log(useCouponResponse);
+      const receipt = useCouponResponse;
+      setLastAction(new Date());
+      console.log("Coupon used successfully:", receipt);
+      return receipt.wait();
     } catch (err) {
       console.error("Error using coupon:", err);
     }
   };
-  const { mutateAsync: buyCouponWrite } = useContractWrite(
-    contract,
-    "buyCoupon"
-  );
 
   const buyCoupon = async (tokenId: number, price: number) => {
     try {
-      if (contract) {
-        const tokenIdBigInt = BigInt(tokenId);
-
-        // Call the contract function with tokenId and required Ether value
-        const buyResponse = await buyCouponWrite({
-          args: [tokenIdBigInt], // Pass the tokenId as an argument
-          overrides: {
-            value: ethers.utils.parseEther(price.toString()), // Replace with logic to fetch the price from the contract if needed
-          },
-        });
-
-        console.log("Transaction sent:", buyResponse);
-
-        // Wait for transaction confirmation
-        const receipt = buyResponse;
-        console.log("Transaction successful:", receipt);
-
-        // Set the last action timestamp (if needed)
-        setLastAction(new Date());
-
-        return receipt;
-      } else {
-        console.error("Contract is not available");
+      if (!etherscontract) {
+        throw new Error("Contract is not available");
       }
+
+      const priceInString = price.toString();
+      const priceInWei = ethers.utils.parseEther(priceInString);
+      const tokenIdBigInt = BigInt(tokenId);
+      const tx = await etherscontract.buyCoupon(tokenIdBigInt, {
+        value: priceInWei,
+      });
+      console.log("Transaction sent:", tx);
+      const receipt = await tx.wait();
+      console.log("Transaction successful:", receipt);
+      setLastAction(new Date());
+      return receipt;
     } catch (err) {
+      console.error("Error buying coupon:", err);
       throw err;
     }
   };
@@ -171,7 +162,7 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
 
   function convertCouponDataArray(couponDataArray) {
     const newData = couponDataArray.map((couponData) => ({
-      tokenId: hexToDecimal(couponData.tokenId._hex), // Convert tokenId from BigNumber to decimal
+      tokenId: hexToDecimal(couponData.tokenId._hex),
       couponCode: couponData.coupon.couponCode,
       discountPercentage: hexToDecimal(
         couponData.coupon.discountPercentage._hex
@@ -224,7 +215,7 @@ export const NFTContextProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    console.log(contract);
+    console.log(contract?.abi);
     getAllCoupons();
     getAllCouponsForOwner(address).then((coupon) => {
       handleUserContracts(coupon);

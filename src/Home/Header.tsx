@@ -33,15 +33,11 @@ const Header: React.FC<HeaderProps> = ({
           console.log(postWallet);
 
           axios
-            .patch(
-              "http://localhost:3333/user/addWallet",
-              postWallet, // Pass postWallet as the second argument (request body)
-              {
-                headers: {
-                  Authorization: `Bearer ${user.authToken}`, // Pass headers as the third argument
-                },
-              }
-            )
+            .patch("http://localhost:3333/user/addWallet", postWallet, {
+              headers: {
+                Authorization: `Bearer ${user.authToken}`,
+              },
+            })
             .then((response) => {
               console.log(response.data);
               handleWalletUpdate(response.data.walletAddress);

@@ -10,9 +10,8 @@ import { AuthContextProvider } from "./Context/AuthContext";
 import App from "./App";
 import { MantineProvider } from "@mantine/core";
 
-// Define the chain for the test network (e.g., Sepolia)
 const activeChain = {
-  chainId: 11155111, // Chain ID for Sepolia
+  chainId: 11155111,
   chainName: "Sepolia Testnet",
   nativeCurrency: {
     name: "Sepolia Ether",
@@ -23,7 +22,6 @@ const activeChain = {
   blockExplorerUrls: ["https://sepolia.etherscan.io"],
 };
 
-// Initialize Thirdweb provider with correct network configuration
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThirdwebProvider activeChain={11155111}>

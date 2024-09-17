@@ -22,23 +22,20 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
-  // Initialize user state from localStorage (if it exists)
   const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
-  // Function to handle setting the user auth token
   const handleSetUserAuth = (token: string) => {
     const newUser = { ...user, authToken: token };
     setUser(newUser);
-    localStorage.setItem("user", JSON.stringify(newUser)); // Save user to localStorage
+    localStorage.setItem("user", JSON.stringify(newUser));
   };
 
-  // Clear user state on logout (optional)
   const handleLogout = () => {
     setUser(null);
-    localStorage.removeItem("user"); // Remove user from localStorage
+    localStorage.removeItem("user");
   };
 
   const handleUserContracts = (contract: []) => {
@@ -89,7 +86,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
           });
       } catch (error) {
         console.error("Error fetching data:", error);
-        // Handle errors here
       }
     }
   }, []);

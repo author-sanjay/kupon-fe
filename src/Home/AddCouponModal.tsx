@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SingleNft from "./SingleNft"; // Ensure this is the correct path for your NFT component
+import SingleNft from "./SingleNft";
 import { useNft } from "../Context/Web3Context";
 import { enqueueSnackbar } from "notistack";
 import { Hourglass } from "react-loader-spinner";
@@ -14,8 +14,8 @@ interface CouponData {
   discount: number;
   couponCode: string;
   expiration: string;
-  price: string; // Price in ETH
-  nftUrl: string; // URL for the NFT image
+  price: string;
+  nftUrl: string;
 }
 
 const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
@@ -133,7 +133,6 @@ const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
                     />
                   </div>
 
-                  {/* Discount Percentage Input */}
                   <div className="mb-4">
                     <label
                       className="block text-white text-sm font-light mb-2"
@@ -154,7 +153,6 @@ const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
                     />
                   </div>
 
-                  {/* Expiration Date Input */}
                   <div className="mb-4">
                     <label
                       className="block text-white text-sm font-light mb-2"
@@ -188,7 +186,6 @@ const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
                     />
                   </div>
 
-                  {/* Price Input */}
                   <div className="mb-4">
                     <label
                       className="block text-white text-sm font-light mb-2"
@@ -207,7 +204,6 @@ const AddCouponModal: React.FC<AddCouponModalProps> = ({ onClose }) => {
                     />
                   </div>
 
-                  {/* NFT URL Input */}
                   <div className="mb-4">
                     <label
                       className="block text-white text-sm font-light mb-2"

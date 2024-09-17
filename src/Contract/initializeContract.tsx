@@ -1,12 +1,12 @@
 import { createThirdwebClient, getContract } from "thirdweb";
 import { defineChain } from "thirdweb/chains";
 
-// create the client with your clientId, or secretKey if in a server environment
+
 const client = createThirdwebClient({
   clientId: "f3edf5c79f6a4a2bebd24df04149867e",
 });
 
-// connect to your contract
+
 export const contract = getContract({
   client,
   chain: defineChain(11155111),
