@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { enqueueSnackbar } from "notistack";
 import { useAuth } from "../Context/AuthContext";
+import { DNA } from "react-loader-spinner";
 const Login = () => {
   const { setUserAuth } = useAuth();
   const [login, setLogin] = useState(true);
@@ -23,7 +24,7 @@ const Login = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [middleName, setMiddleName] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const handleSignUpPassword = (confirmPassword: string) => {
     if (password === confirmPassword) {
       setPasswordMatch(true);
@@ -40,6 +41,7 @@ const Login = () => {
   };
 
   const handleLogin = () => {
+    setLoading(true);
     const data = { email: email, password: password };
     axios
       .post("https://kupon-f86c.onrender.com/auth/login", data)
@@ -50,12 +52,20 @@ const Login = () => {
           autoHideDuration: 3000,
           preventDuplicate: true,
         });
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
+        enqueueSnackbar("Error: " + err.response.data.message, {
+          variant: "success",
+          autoHideDuration: 3000,
+          preventDuplicate: true,
+        });
+        setLoading(false);
       });
   };
   const handleSignup = () => {
+    setLoading(true);
     const data = {
       email: email,
       password: password,
@@ -75,6 +85,7 @@ const Login = () => {
           "Success: Your Account has been registered. Please Login to your account",
           { variant: "success", autoHideDuration: 3000, preventDuplicate: true }
         );
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
@@ -83,6 +94,7 @@ const Login = () => {
           autoHideDuration: 3000,
           preventDuplicate: true,
         });
+        setLoading(false);
         setLogin(true);
         setEmail("");
         setEmailValid(false);
@@ -139,18 +151,29 @@ const Login = () => {
                 />
               </div>
 
-              <motion.button
-                type="submit"
-                className={`bg-blue-500 text-white p-2 rounded-lg mt-5 w-full hover:bg-blue-600 transition-colors duration-300 ${
-                  !emailValid ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={!emailValid}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleLogin}
-              >
-                Login
-              </motion.button>
+              {loading ? (
+                <DNA
+                  visible={true}
+                  height="80"
+                  width="80"
+                  ariaLabel="dna-loading"
+                  wrapperStyle={{}}
+                  wrapperClass="dna-wrapper"
+                />
+              ) : (
+                <motion.button
+                  type="submit"
+                  className={`bg-blue-500 text-white p-2 rounded-lg mt-5 w-full hover:bg-blue-600 transition-colors duration-300 ${
+                    !emailValid ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={!emailValid}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLogin}
+                >
+                  Login
+                </motion.button>
+              )}
             </motion.div>
           </>
         ) : (
@@ -289,15 +312,26 @@ const Login = () => {
                       placeholder="Last Name"
                     />
                   </div>
-                  <motion.button
-                    type="submit"
-                    className="bg-blue-500 text-white p-2 rounded-lg mt-5 w-full hover:bg-blue-600 transition-colors duration-300"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSignup}
-                  >
-                    Sign Up
-                  </motion.button>
+                  {loading ? (
+                    <DNA
+                      visible={true}
+                      height="80"
+                      width="80"
+                      ariaLabel="dna-loading"
+                      wrapperStyle={{}}
+                      wrapperClass="dna-wrapper"
+                    />
+                  ) : (
+                    <motion.button
+                      type="submit"
+                      className="bg-blue-500 text-white p-2 rounded-lg mt-5 w-full hover:bg-blue-600 transition-colors duration-300"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleSignup}
+                    >
+                      Sign Up
+                    </motion.button>
+                  )}
                 </>
               )}
             </motion.div>
