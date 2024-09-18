@@ -57,7 +57,7 @@ const Login = () => {
       .catch((err) => {
         console.log(err);
         enqueueSnackbar("Error: " + err.response.data.message, {
-          variant: "success",
+          variant: "error",
           autoHideDuration: 3000,
           preventDuplicate: true,
         });
