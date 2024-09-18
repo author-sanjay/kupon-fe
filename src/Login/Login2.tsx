@@ -42,7 +42,7 @@ const Login = () => {
   const handleLogin = () => {
     const data = { email: email, password: password };
     axios
-      .post("https://kupon-f86c.onrender.com:3333/auth/login", data)
+      .post("https://kupon-f86c.onrender.com/auth/login", data)
       .then((response) => {
         setUserAuth(response.data.access_token);
         enqueueSnackbar("Login Success", {
@@ -65,7 +65,7 @@ const Login = () => {
       isCompany: false,
     };
     axios
-      .post("https://kupon-f86c.onrender.com:3333/user/register", data)
+      .post("https://kupon-f86c.onrender.com/user/register", data)
       .then((response) => {
         setEmail("");
         setPassword("");

@@ -32,7 +32,7 @@ const Header: React.FC<HeaderProps> = ({
 
           axios
             .patch(
-              "https://kupon-f86c.onrender.com:3333/user/addWallet",
+              "https://kupon-f86c.onrender.com/user/addWallet",
               postWallet,
               {
                 headers: {

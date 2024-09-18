@@ -79,7 +79,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         listofCoupons ? listofCoupons : user.coupons
       );
       const response = await axios.post(
-        "https://kupon-f86c.onrender.com:3333/coupons/addCouponsBatch",
+        "https://kupon-f86c.onrender.com/coupons/addCouponsBatch",
         nftData,
         {
           headers: {
@@ -104,7 +104,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       newUserWalletAddress: newUserWalletAddress,
     };
     const response = await axios.patch(
-      "https://kupon-f86c.onrender.com:3333/coupons/transferCoupon",
+      "https://kupon-f86c.onrender.com/coupons/transferCoupon",
       transferData,
       {
         headers: {
@@ -121,7 +121,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       tokenId: nftTokenAddress,
     };
     const response = await axios.patch(
-      "https://kupon-f86c.onrender.com:3333/coupons/useCoupon",
+      "https://kupon-f86c.onrender.com/coupons/useCoupon",
       transferData,
       {
         headers: {
@@ -146,7 +146,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     if (storedUser) {
       try {
         axios
-          .get("https://kupon-f86c.onrender.com:3333/user/getUser", {
+          .get("https://kupon-f86c.onrender.com/user/getUser", {
             headers: {
               Authorization: `Bearer ${storedUser.authToken}`,
             },
