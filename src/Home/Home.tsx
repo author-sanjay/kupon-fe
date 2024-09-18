@@ -9,6 +9,8 @@ import MarketPlace from "../MaketPlace/MarketPlace";
 import { Mail, Phone } from "lucide-react";
 import QR from "../assets/DeveloperQR.png";
 import AddCouponModal from "./AddCouponModal";
+import { Pagination } from "@mantine/core"; // Import Mantine Pagination
+
 function Home() {
   const { user, handlePostNFT } = useAuth();
   const [sell, setSell] = useState(false);
@@ -20,6 +22,14 @@ function Home() {
   );
   const [addCoupon, setAddCoupon] = useState(false);
   const [userCoupons, setUserCoupons] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); // Add state for current page
+  const itemsPerPage = 10; // Set the number of items per page
+
+  // Function to calculate paginated data
+  const paginatedCoupons = userCoupons?.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   useEffect(() => {
     if (user && userCoupons && userCoupons.length > 0) {
@@ -32,6 +42,7 @@ function Home() {
         });
     }
   }, [userCoupons]);
+
   useEffect(() => {
     if (user?.walletAddress) {
       setIsWalletConnected(true);
@@ -92,7 +103,7 @@ function Home() {
               </>
             ) : (
               <>
-                <div className="h-4/5 bg-[#CCBED0] text-black flex w-full items-center justify-center">
+                <div className="h-[120vh] overflow-hidden bg-[#CCBED0] text-black flex w-full items-center justify-center">
                   <div className="w-full px-10 h-[90%] flex flex-col">
                     <div className="w-full flex flex-row justify-between items-center">
                       <div className="flex w-full flex-col justify-between animate-fade-in">
@@ -137,10 +148,10 @@ function Home() {
                             )}
                           </div>
                         </>
-                      ) : userCoupons ? (
+                      ) : (
                         <>
                           <div className="grid grid-cols-5 gap-4 animate-fade-in">
-                            {userCoupons?.map((coupon, index) => (
+                            {paginatedCoupons?.map((coupon, index) => (
                               <SingleNft
                                 key={index}
                                 nft={coupon}
@@ -150,9 +161,21 @@ function Home() {
                               />
                             ))}
                           </div>
+                          <div className="flex justify-center mt-10">
+                            {/* Mantine Pagination Component */}
+                            <Pagination
+                              total={Math.ceil(
+                                userCoupons?.length / itemsPerPage
+                              )}
+                              // @ts-ignore
+                              page={currentPage}
+                              onChange={setCurrentPage}
+                              size="lg"
+                              withControls
+                              withEdges
+                            />
+                          </div>
                         </>
-                      ) : (
-                        <></>
                       )}
                     </div>
                   </div>

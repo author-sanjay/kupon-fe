@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ThirdwebProvider, useWallet } from "@thirdweb-dev/react";
 import { NFTContextProvider } from "./Context/Web3Context";
@@ -9,6 +9,7 @@ import { SnackbarProvider } from "notistack";
 import { AuthContextProvider } from "./Context/AuthContext";
 import App from "./App";
 import { MantineProvider } from "@mantine/core";
+import { ethers } from "ethers";
 
 const activeChain = {
   chainId: 11155111,
@@ -25,13 +26,15 @@ const activeChain = {
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThirdwebProvider activeChain={11155111}>
-      <AuthContextProvider>
-        <NFTContextProvider>
-          <SnackbarProvider>
-            <App />
-          </SnackbarProvider>
-        </NFTContextProvider>
-      </AuthContextProvider>
+      <MantineProvider>
+        <AuthContextProvider>
+          <NFTContextProvider>
+            <SnackbarProvider>
+              <App />
+            </SnackbarProvider>
+          </NFTContextProvider>
+        </AuthContextProvider>
+      </MantineProvider>
     </ThirdwebProvider>
   </React.StrictMode>
 );
